@@ -52,6 +52,20 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <footer className="absolute bottom-4 left-0 right-0 text-center">
+        <p className="text-xs text-muted/50">
+          Powered by{" "}
+          <a
+            href="https://artblocks.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-accent"
+          >
+            Art Blocks
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

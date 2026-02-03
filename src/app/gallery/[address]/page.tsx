@@ -56,6 +56,20 @@ export default function GalleryPage() {
     );
   }, [status]);
 
+  // Update page title when collection loads
+  useEffect(() => {
+    if (status.phase === "done") {
+      const name = status.ens || `${status.address.slice(0, 6)}...${status.address.slice(-4)}`;
+      const totalPieces = status.groups.reduce(
+        (sum, g) => sum + g.projects.reduce((s, p) => s + p.tokens.length, 0),
+        0
+      );
+      document.title = `${name} (${totalPieces} pieces) | onview.art`;
+    } else if (status.phase === "error" || status.phase === "empty") {
+      document.title = "onview.art";
+    }
+  }, [status]);
+
   useEffect(() => {
     let cancelled = false;
 
