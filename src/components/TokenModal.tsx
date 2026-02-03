@@ -234,26 +234,6 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         {/* Bottom gradient for text readability */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
-        {/* Artwork info overlay - bottom left */}
-        {token && (
-          <div className="pointer-events-none absolute bottom-8 left-8">
-            <p className="text-xs uppercase tracking-widest text-white/70 drop-shadow-md">
-              {token.project.artist_name}
-            </p>
-            <p className="mt-1 text-lg font-light text-white drop-shadow-md">
-              {token.project.name}
-            </p>
-            <p className="mt-1 font-mono text-xs text-white/60 drop-shadow-md">
-              #{token.invocation} of {token.project.max_invocations}
-              {tokenIds.length > 1 && (
-                <span className="ml-3">
-                  {currentIndex + 1} / {tokenIds.length}
-                </span>
-              )}
-            </p>
-          </div>
-        )}
-
         {/* Scroll down hint - bottom center, hidden after scrolling */}
         {token && !hasScrolled && (
           <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
@@ -325,6 +305,20 @@ function TokenDetailContent({ token }: { token: ArtBlocksTokenDetail }) {
         {!imageLoaded && !iframeLoaded && (
           <div className="absolute inset-0 skeleton" />
         )}
+
+        {/* Artwork info overlay - scrolls with art */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent pb-8 pl-8 pt-24">
+          <p className="text-xs uppercase tracking-widest text-white/70 drop-shadow-md">
+            {token.project.artist_name}
+          </p>
+          <p className="mt-1 text-lg font-light text-white drop-shadow-md">
+            {token.project.name}
+          </p>
+          <p className="mt-1 font-mono text-xs text-white/60 drop-shadow-md">
+            #{token.invocation} of {token.project.max_invocations}
+          </p>
+        </div>
+
         {token.live_view_url ? (
           <div className="relative h-full w-full">
             {!iframeLoaded && (
