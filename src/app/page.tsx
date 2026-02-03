@@ -32,22 +32,22 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/gallery/artblocks.eth"
+              href="/gallery/snowfro.eth"
               className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
             >
-              artblocks.eth
+              snowfro.eth
             </Link>
             <Link
-              href="/gallery/punk6529.eth"
+              href="/gallery/vault.jordanlyall.eth"
               className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
             >
-              punk6529.eth
+              vault.jordanlyall.eth
             </Link>
             <Link
-              href="/gallery/cozomo.eth"
+              href="/gallery/0xhouston.eth"
               className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
             >
-              cozomo.eth
+              0xhouston.eth
             </Link>
           </div>
         </div>
