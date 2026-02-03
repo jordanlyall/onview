@@ -44,10 +44,13 @@ export function GallerySection({
 
   const totalTokens = allTokens.length;
 
+  const sectionId = `section-${group.label.toLowerCase().replace(/\s+/g, "-")}`;
+
   return (
     <section
       ref={ref}
-      className={`gallery-section mb-24 ${visible ? "visible" : ""}`}
+      id={sectionId}
+      className={`gallery-section mb-24 scroll-mt-20 ${visible ? "visible" : ""}`}
     >
       {/* Tier divider */}
       <div className="mb-12 flex items-center gap-6 px-4 sm:px-8">

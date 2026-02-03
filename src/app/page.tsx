@@ -4,48 +4,48 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <div className="absolute right-6 top-4">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
+      <div className="absolute right-4 top-4 sm:right-6">
         <ThemeToggle />
       </div>
-      <div className="flex flex-col items-center gap-8 text-center">
+      <div className="flex w-full flex-col items-center gap-6 text-center sm:gap-8">
         <div>
-          <h1 className="text-5xl font-light tracking-tight sm:text-7xl">
+          <h1 className="text-4xl font-light tracking-tight sm:text-5xl md:text-7xl">
             <span className="text-foreground">onview</span>
             <span className="text-accent">.art</span>
           </h1>
-          <p className="mt-4 text-lg text-muted">
+          <p className="mt-3 text-base text-muted sm:mt-4 sm:text-lg">
             Your Art Blocks collection, beautifully presented
           </p>
         </div>
 
-        <div className="flex w-full max-w-lg flex-col gap-3">
+        <div className="flex w-full max-w-lg flex-col gap-3 px-2 sm:px-0">
           <WalletInput />
-          <p className="text-sm text-muted/70">
+          <p className="text-xs text-muted/70 sm:text-sm">
             Separate multiple wallets with commas
           </p>
         </div>
 
-        <div className="mt-4 flex flex-col items-center gap-2">
+        <div className="mt-2 flex flex-col items-center gap-2 sm:mt-4">
           <p className="text-xs uppercase tracking-widest text-muted/50">
             Try an example
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
             <Link
               href="/gallery/snowfro.eth"
-              className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+              className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent sm:px-4 sm:text-sm"
             >
               snowfro.eth
             </Link>
             <Link
               href="/gallery/vault.jordanlyall.eth"
-              className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+              className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent sm:px-4 sm:text-sm"
             >
               vault.jordanlyall.eth
             </Link>
             <Link
               href="/gallery/0xhouston.eth"
-              className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+              className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent sm:px-4 sm:text-sm"
             >
               0xhouston.eth
             </Link>

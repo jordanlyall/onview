@@ -13,6 +13,7 @@ interface Props {
 
 const IDLE_TIMEOUT = 3000;
 const SLIDESHOW_INTERVAL = 60000;
+const SWIPE_THRESHOLD = 50;
 
 export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
   const [token, setToken] = useState<ArtBlocksTokenDetail | null>(null);
@@ -24,6 +25,8 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const slideshowRef = useRef<ReturnType<typeof setInterval>>(undefined);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const currentIndex = tokenIds.indexOf(tokenId);
   const hasPrev = currentIndex > 0;
@@ -53,14 +56,16 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
     return () => clearTimeout(timerRef.current);
   }, [resetIdleTimer]);
 
-  // Track mouse/touch movement
+  // Track mouse/touch movement - also track clicks to catch iframe edge cases
   useEffect(() => {
     const handler = () => resetIdleTimer();
     window.addEventListener("mousemove", handler);
     window.addEventListener("touchstart", handler);
+    window.addEventListener("click", handler);
     return () => {
       window.removeEventListener("mousemove", handler);
       window.removeEventListener("touchstart", handler);
+      window.removeEventListener("click", handler);
     };
   }, [resetIdleTimer]);
 
@@ -123,6 +128,34 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
     };
   }, [handleKeyDown]);
 
+  // Swipe gestures for mobile navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+      // Only trigger if horizontal swipe is dominant
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        if (deltaX > 0) {
+          goPrev();
+        } else {
+          goNext();
+        }
+      }
+
+      touchStartX.current = null;
+      touchStartY.current = null;
+    },
+    [goNext, goPrev]
+  );
+
   // Slideshow auto-advance
   useEffect(() => {
     if (slideshow && hasNext) {
@@ -146,7 +179,14 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
   }, [resetIdleTimer]);
 
   return (
-    <div ref={modalRef} className="fixed inset-0 z-[100] overflow-y-auto bg-background">
+    <div
+      ref={modalRef}
+      className="fixed inset-0 z-[100] overflow-y-auto bg-background"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onMouseMove={resetIdleTimer}
+      onClick={resetIdleTimer}
+    >
       {/* UI overlay - fixed to viewport, fades on idle */}
       <div
         className={`pointer-events-none fixed inset-0 z-[110] transition-opacity duration-500 ${
@@ -154,10 +194,10 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         }`}
       >
         {/* Top bar: close + slideshow */}
-        <div className="pointer-events-auto absolute right-4 top-4 flex items-center gap-2">
+        <div className="pointer-events-auto absolute right-2 top-2 flex items-center gap-2 sm:right-4 sm:top-4">
           <button
             onClick={toggleSlideshow}
-            className="relative rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white sm:h-12 sm:w-12"
             aria-label={slideshow ? "Pause slideshow" : "Play slideshow"}
             title={slideshow ? "Pause" : "Slideshow"}
           >
@@ -198,7 +238,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
           </button>
           <button
             onClick={onClose}
-            className="rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white sm:h-12 sm:w-12"
             aria-label="Close"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -207,11 +247,11 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
           </button>
         </div>
 
-        {/* Left/right navigation arrows */}
+        {/* Left/right navigation arrows - hidden on mobile, swipe instead */}
         {hasPrev && (
           <button
             onClick={goPrev}
-            className="pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+            className="pointer-events-auto absolute left-2 top-1/2 hidden -translate-y-1/2 rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white sm:flex sm:left-4"
             aria-label="Previous"
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -222,7 +262,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         {hasNext && (
           <button
             onClick={goNext}
-            className="pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+            className="pointer-events-auto absolute right-2 top-1/2 hidden -translate-y-1/2 rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white sm:flex sm:right-4"
             aria-label="Next"
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -234,11 +274,12 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         {/* Bottom gradient for text readability */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
-        {/* Scroll down hint - bottom center, hidden after scrolling */}
+        {/* Scroll/swipe hint - bottom center, hidden after scrolling */}
         {token && !hasScrolled && (
-          <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+          <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 sm:bottom-8">
             <p className="text-xs uppercase tracking-widest text-white/60 drop-shadow-md">
-              Scroll for details
+              <span className="hidden sm:inline">Scroll for details</span>
+              <span className="sm:hidden">Swipe to navigate</span>
             </p>
             <svg
               width="20"
@@ -247,9 +288,20 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="animate-bounce text-white/60 drop-shadow-md"
+              className="animate-bounce text-white/60 drop-shadow-md sm:block hidden"
             >
               <path d="M6 9l6 6 6-6" />
+            </svg>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="text-white/60 drop-shadow-md sm:hidden"
+            >
+              <path d="M8 7l4-4 4 4M8 17l4 4 4-4" />
             </svg>
           </div>
         )}
@@ -308,17 +360,17 @@ function TokenDetailContent({ token, uiVisible }: { token: ArtBlocksTokenDetail;
 
         {/* Artwork info overlay - scrolls with art, fades on idle */}
         <div
-          className={`pointer-events-none absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent pb-8 pl-8 pt-24 transition-opacity duration-500 ${
+          className={`pointer-events-none absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent pb-6 pl-4 pt-16 transition-opacity duration-500 sm:pb-8 sm:pl-8 sm:pt-24 ${
             uiVisible ? "opacity-100" : "opacity-0"
           }`}
         >
-          <p className="text-xs uppercase tracking-widest text-white/70 drop-shadow-md">
+          <p className="text-[10px] uppercase tracking-widest text-white/70 drop-shadow-md sm:text-xs">
             {token.project.artist_name}
           </p>
-          <p className="mt-1 text-lg font-light text-white drop-shadow-md">
+          <p className="mt-1 text-base font-light text-white drop-shadow-md sm:text-lg">
             {token.project.name}
           </p>
-          <p className="mt-1 font-mono text-xs text-white/60 drop-shadow-md">
+          <p className="mt-1 font-mono text-[10px] text-white/60 drop-shadow-md sm:text-xs">
             #{token.invocation} of {token.project.max_invocations}
           </p>
         </div>
@@ -423,24 +475,32 @@ function TokenDetailContent({ token, uiVisible }: { token: ArtBlocksTokenDetail;
           )}
 
           {/* Links */}
-          <div className="flex flex-wrap gap-6 pt-10">
+          <div className="flex flex-wrap gap-4 pt-10">
             {token.live_view_url && (
               <a
                 href={token.live_view_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs uppercase tracking-widest text-accent hover:underline"
+                className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+                title="Open Fullscreen"
               >
-                Open Fullscreen
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
+                <span className="sr-only sm:not-sr-only">Fullscreen</span>
               </a>
             )}
             <a
               href={`https://www.artblocks.io/collections/${token.project.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs uppercase tracking-widest text-accent hover:underline"
+              className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+              title="View on Art Blocks"
             >
-              View on Art Blocks
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+              </svg>
+              <span className="sr-only sm:not-sr-only">Art Blocks</span>
             </a>
           </div>
         </div>

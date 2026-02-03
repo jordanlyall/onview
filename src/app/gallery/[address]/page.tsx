@@ -10,6 +10,7 @@ import {
 } from "@/lib/artblocks";
 import { groupTokens, TokenGroup } from "@/lib/grouping";
 import { CollectorHeader } from "@/components/CollectorHeader";
+import { CollectionNav } from "@/components/CollectionNav";
 import { GallerySection } from "@/components/GallerySection";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TokenModal } from "@/components/TokenModal";
@@ -182,6 +183,7 @@ export default function GalleryPage() {
 
       {status.phase === "done" && (
         <>
+          <CollectionNav groups={status.groups} />
           <CollectorHeader
             address={status.address}
             ens={status.ens}
