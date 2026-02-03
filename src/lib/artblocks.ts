@@ -69,6 +69,7 @@ const TOKEN_DETAIL_QUERY = `
       features
       minted_at
       owner_address
+      contract_address
       project {
         name
         artist_name
@@ -93,6 +94,7 @@ export interface ArtBlocksTokenDetail extends ArtBlocksToken {
   features: Record<string, unknown> | null;
   minted_at: string | null;
   owner_address: string;
+  contract_address: string;
   project: ArtBlocksProject & {
     website: string | null;
     license: string | null;

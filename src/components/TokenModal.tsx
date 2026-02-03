@@ -491,7 +491,7 @@ function TokenDetailContent({ token, uiVisible }: { token: ArtBlocksTokenDetail;
               </a>
             )}
             <a
-              href={`https://www.artblocks.io/collections/${token.project.slug}`}
+              href={`https://www.artblocks.io/token/1/${token.contract_address}/${token.token_id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
