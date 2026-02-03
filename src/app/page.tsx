@@ -10,8 +10,9 @@ export default function Home() {
       </div>
       <div className="flex flex-col items-center gap-8 text-center">
         <div>
-          <h1 className="text-5xl font-light tracking-tight text-foreground sm:text-7xl">
-            On View
+          <h1 className="text-5xl font-light tracking-tight sm:text-7xl">
+            <span className="text-foreground">onview</span>
+            <span className="text-accent">.art</span>
           </h1>
           <p className="mt-4 text-lg text-muted">
             Your Art Blocks collection, beautifully presented

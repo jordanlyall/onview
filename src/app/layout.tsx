@@ -14,9 +14,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Auto Gallery | Art Blocks Collection Viewer",
+  title: "onview.art | Art Blocks Collection Viewer",
   description:
-    "View any wallet's Art Blocks collection in a curated gallery format",
+    "Your Art Blocks collection, beautifully presented. Enter any wallet or ENS to view a curated gallery.",
+  openGraph: {
+    title: "onview.art",
+    description: "Your Art Blocks collection, beautifully presented",
+    siteName: "onview.art",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "onview.art",
+    description: "Your Art Blocks collection, beautifully presented",
+  },
 };
 
 export default function RootLayout({
