@@ -18,9 +18,9 @@ const TIER_ORDER: Record<string, number> = {
   curated: 0,
   presents: 1,
   heritage: 2,
-  ab500: 3,
+  "art blocks 500": 3,
   explorations: 4,
-  flex: 5,
+  studio: 5,
   playground: 6,
   collaborations: 7,
 };
@@ -39,12 +39,12 @@ function getTierLabel(token: ArtBlocksToken): string {
     curation === "factory"
   )
     return "Explorations";
-  if (curation === "flex" || vertical === "flex") return "Flex";
   if (curation === "playground" || vertical === "playground")
     return "Playground";
   if (vertical === "collaborations") return "Collaborations";
 
-  return "Other";
+  // Flex and anything else goes to Studio
+  return "Studio";
 }
 
 function getTierOrder(label: string): number {

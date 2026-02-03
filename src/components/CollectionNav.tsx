@@ -102,9 +102,12 @@ function getShortLabel(label: string): string {
   const shorts: Record<string, string> = {
     Curated: "Cur",
     Presents: "Pres",
+    Heritage: "Her",
+    "Art Blocks 500": "500",
     Explorations: "Exp",
-    Studio: "Stu",
+    Playground: "Play",
     Collaborations: "Col",
+    Studio: "Stu",
   };
   return shorts[label] || label.slice(0, 3);
 }
