@@ -129,8 +129,8 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
   }, [resetIdleTimer]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-background">
-      {/* UI overlay - fades on idle */}
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-background">
+      {/* UI overlay - fixed to viewport, fades on idle */}
       <div
         className={`pointer-events-none fixed inset-0 z-[110] transition-opacity duration-500 ${
           uiVisible ? "opacity-100" : "opacity-0"
@@ -140,7 +140,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         <div className="pointer-events-auto absolute right-4 top-4 flex items-center gap-2">
           <button
             onClick={toggleSlideshow}
-            className="museum-label rounded-full p-3 text-muted transition-colors hover:text-foreground"
+            className="rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
             aria-label={slideshow ? "Pause slideshow" : "Play slideshow"}
             title={slideshow ? "Pause" : "Slideshow"}
           >
@@ -156,7 +156,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
           </button>
           <button
             onClick={onClose}
-            className="museum-label rounded-full p-3 text-muted transition-colors hover:text-foreground"
+            className="rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
             aria-label="Close"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -169,7 +169,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         {hasPrev && (
           <button
             onClick={goPrev}
-            className="pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 museum-label rounded-full p-3 text-muted transition-colors hover:text-foreground"
+            className="pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
             aria-label="Previous"
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -180,7 +180,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         {hasNext && (
           <button
             onClick={goNext}
-            className="pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 museum-label rounded-full p-3 text-muted transition-colors hover:text-foreground"
+            className="pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-3 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
             aria-label="Next"
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -189,16 +189,19 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
           </button>
         )}
 
+        {/* Bottom gradient for text readability */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
         {/* Artwork info overlay - bottom left */}
         {token && (
           <div className="pointer-events-none absolute bottom-8 left-8">
-            <p className="text-xs uppercase tracking-widest text-white/50">
+            <p className="text-xs uppercase tracking-widest text-white/70 drop-shadow-md">
               {token.project.artist_name}
             </p>
-            <p className="mt-1 text-lg font-light text-white/80">
+            <p className="mt-1 text-lg font-light text-white drop-shadow-md">
               {token.project.name}
             </p>
-            <p className="mt-1 font-mono text-xs text-white/40">
+            <p className="mt-1 font-mono text-xs text-white/60 drop-shadow-md">
               #{token.invocation} of {token.project.max_invocations}
               {tokenIds.length > 1 && (
                 <span className="ml-3">
@@ -212,7 +215,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         {/* Scroll down hint - bottom center */}
         {token && (
           <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-            <p className="text-xs uppercase tracking-widest text-muted/60">
+            <p className="text-xs uppercase tracking-widest text-white/60 drop-shadow-md">
               Scroll for details
             </p>
             <svg
@@ -222,7 +225,7 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="animate-bounce text-muted/60"
+              className="animate-bounce text-white/60 drop-shadow-md"
             >
               <path d="M6 9l6 6 6-6" />
             </svg>
@@ -230,28 +233,26 @@ export function TokenModal({ tokenId, tokenIds, onNavigate, onClose }: Props) {
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {loading && (
-          <div className="flex h-full items-center justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border border-muted border-t-accent" />
-          </div>
-        )}
+      {/* Content with sticky artwork */}
+      {loading && (
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border border-muted border-t-accent" />
+        </div>
+      )}
 
-        {error && (
-          <div className="flex h-full flex-col items-center justify-center text-center">
-            <p className="text-xl font-light text-foreground">{error}</p>
-            <button
-              onClick={onClose}
-              className="mt-8 text-xs uppercase tracking-widest text-accent hover:underline"
-            >
-              Close
-            </button>
-          </div>
-        )}
+      {error && (
+        <div className="flex h-screen flex-col items-center justify-center text-center">
+          <p className="text-xl font-light text-foreground">{error}</p>
+          <button
+            onClick={onClose}
+            className="mt-8 text-xs uppercase tracking-widest text-accent hover:underline"
+          >
+            Close
+          </button>
+        </div>
+      )}
 
-        {token && <TokenDetailContent token={token} />}
-      </div>
+      {token && <TokenDetailContent token={token} />}
     </div>
   );
 }
@@ -275,8 +276,8 @@ function TokenDetailContent({ token }: { token: ArtBlocksTokenDetail }) {
 
   return (
     <>
-      {/* Full-screen artwork */}
-      <div className="relative h-screen w-full overflow-hidden bg-black">
+      {/* Sticky artwork - stays pinned while scrolling */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
         {token.live_view_url ? (
           <div className="relative h-full w-full">
             {!iframeLoaded && (
@@ -307,90 +308,92 @@ function TokenDetailContent({ token }: { token: ArtBlocksTokenDetail }) {
         )}
       </div>
 
-      {/* Info section */}
-      <div className="mx-auto max-w-3xl px-6 py-16 sm:px-8">
-        {/* Title block */}
-        <div className="border-b border-border pb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted">
-            {token.project.artist_name}
-          </p>
-          <h1 className="mt-3 text-4xl font-light tracking-tight text-foreground sm:text-5xl">
-            {token.project.name}
-          </h1>
-          <p className="mt-3 font-mono text-sm text-muted">
-            #{token.invocation} of {token.project.max_invocations}
-          </p>
-        </div>
-
-        {/* Description */}
-        {token.project.description && (
-          <div className="border-b border-border py-10">
-            <p className="text-sm leading-relaxed text-foreground/80">
-              {token.project.description}
+      {/* Info section - slides up over the sticky artwork */}
+      <div className="relative z-10 bg-background">
+        <div className="mx-auto max-w-3xl px-6 py-16 sm:px-8">
+          {/* Title block */}
+          <div className="border-b border-border pb-10">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted">
+              {token.project.artist_name}
+            </p>
+            <h1 className="mt-3 text-4xl font-light tracking-tight text-foreground sm:text-5xl">
+              {token.project.name}
+            </h1>
+            <p className="mt-3 font-mono text-sm text-muted">
+              #{token.invocation} of {token.project.max_invocations}
             </p>
           </div>
-        )}
 
-        {/* Details grid */}
-        <div className="grid gap-8 border-b border-border py-10 sm:grid-cols-2">
-          <DetailItem
-            label="Collection"
-            value={
-              token.project.curation_status_display ||
-              token.project.vertical_name
-            }
-          />
-          {mintDate && <DetailItem label="Minted" value={mintDate} />}
-          {token.project.license && (
-            <DetailItem label="License" value={token.project.license} />
-          )}
-          {token.project.script_type_and_version && (
-            <DetailItem
-              label="Script"
-              value={token.project.script_type_and_version}
-            />
-          )}
-          <DetailItem
-            label="Edition Size"
-            value={`${token.project.invocations} / ${token.project.max_invocations}`}
-          />
-          <DetailItem label="Aspect Ratio" value={aspectRatio.toFixed(2)} />
-        </div>
-
-        {/* Features */}
-        {features.length > 0 && (
-          <div className="border-b border-border py-10">
-            <p className="mb-6 text-xs uppercase tracking-[0.3em] text-muted">
-              Features
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {features.map(([key, value]) => (
-                <DetailItem key={key} label={key} value={String(value)} />
-              ))}
+          {/* Description */}
+          {token.project.description && (
+            <div className="border-b border-border py-10">
+              <p className="text-sm leading-relaxed text-foreground/80">
+                {token.project.description}
+              </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Links */}
-        <div className="flex flex-wrap gap-6 pt-10">
-          {token.live_view_url && (
+          {/* Details grid */}
+          <div className="grid gap-8 border-b border-border py-10 sm:grid-cols-2">
+            <DetailItem
+              label="Collection"
+              value={
+                token.project.curation_status_display ||
+                token.project.vertical_name
+              }
+            />
+            {mintDate && <DetailItem label="Minted" value={mintDate} />}
+            {token.project.license && (
+              <DetailItem label="License" value={token.project.license} />
+            )}
+            {token.project.script_type_and_version && (
+              <DetailItem
+                label="Script"
+                value={token.project.script_type_and_version}
+              />
+            )}
+            <DetailItem
+              label="Edition Size"
+              value={`${token.project.invocations} / ${token.project.max_invocations}`}
+            />
+            <DetailItem label="Aspect Ratio" value={aspectRatio.toFixed(2)} />
+          </div>
+
+          {/* Features */}
+          {features.length > 0 && (
+            <div className="border-b border-border py-10">
+              <p className="mb-6 text-xs uppercase tracking-[0.3em] text-muted">
+                Features
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {features.map(([key, value]) => (
+                  <DetailItem key={key} label={key} value={String(value)} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Links */}
+          <div className="flex flex-wrap gap-6 pt-10">
+            {token.live_view_url && (
+              <a
+                href={token.live_view_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs uppercase tracking-widest text-accent hover:underline"
+              >
+                Open Fullscreen
+              </a>
+            )}
             <a
-              href={token.live_view_url}
+              href={`https://www.artblocks.io/collections/${token.project.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs uppercase tracking-widest text-accent hover:underline"
             >
-              Open Fullscreen
+              View on Art Blocks
             </a>
-          )}
-          <a
-            href={`https://www.artblocks.io/collections/${token.project.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs uppercase tracking-widest text-accent hover:underline"
-          >
-            View on Art Blocks
-          </a>
+          </div>
         </div>
       </div>
     </>
