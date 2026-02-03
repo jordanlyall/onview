@@ -45,17 +45,27 @@ async function resolveSingle(input: string): Promise<ResolvedWallet> {
 }
 
 export function isMultiWallet(input: string): boolean {
-  return input.includes(",");
+  return input.includes(",") || input.includes("+");
 }
 
 export async function resolveInput(
   input: string
 ): Promise<{ wallets: ResolvedWallet[]; primary: ResolvedWallet }> {
+  // Accept both comma and plus as separators
   const parts = input
-    .split(",")
+    .split(/[,+]/)
     .map((s) => s.trim())
     .filter(Boolean);
 
   const wallets = await Promise.all(parts.map(resolveSingle));
   return { wallets, primary: wallets[0] };
+}
+
+// Convert input to URL-friendly format using + separator
+export function toUrlPath(input: string): string {
+  return input
+    .split(/[,+]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join("+");
 }

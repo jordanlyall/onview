@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toUrlPath } from "@/lib/ens";
 
 export function WalletInput() {
   const [input, setInput] = useState("");
@@ -11,7 +12,8 @@ export function WalletInput() {
     e.preventDefault();
     const trimmed = input.trim();
     if (trimmed) {
-      router.push(`/gallery/${encodeURIComponent(trimmed)}`);
+      // Use + separator for clean URLs (no encoding needed)
+      router.push(`/gallery/${toUrlPath(trimmed)}`);
     }
   };
 
@@ -22,7 +24,7 @@ export function WalletInput() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="ENS or address (comma-separate for multiple)"
+          placeholder="ENS or address (use + for multiple)"
           className="flex-1 rounded-lg border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           spellCheck={false}
           autoComplete="off"
