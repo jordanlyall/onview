@@ -24,7 +24,7 @@ export function WalletInput() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="ENS or address (use + for multiple)"
+          placeholder="ENS or wallet address"
           className="flex-1 rounded-lg border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           spellCheck={false}
           autoComplete="off"

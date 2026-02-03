@@ -22,8 +22,7 @@ export default function Home() {
         <div className="flex w-full max-w-lg flex-col gap-3">
           <WalletInput />
           <p className="text-sm text-muted/70">
-            Enter an ENS name or wallet address. Use{" "}
-            <span className="font-mono text-muted">+</span> to combine multiple wallets.
+            Separate multiple wallets with commas
           </p>
         </div>
 
