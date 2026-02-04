@@ -1,6 +1,6 @@
 # onview.art
 
-A beautiful, museum-style viewer for Art Blocks NFT collections.
+Instant galleries for Art Blocks collectors. Paste any wallet or ENS to create a beautiful, shareable gallery of your collection. No signup required.
 
 **Live at [onview.art](https://onview.art)**
 
