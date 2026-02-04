@@ -76,7 +76,7 @@ export default function TokenDetailPage() {
             {status.message}
           </p>
           <Link
-            href={`/gallery/${encodeURIComponent(address)}`}
+            href={`/${encodeURIComponent(address)}`}
             className="mt-8 text-xs uppercase tracking-widest text-accent hover:underline"
           >
             Back to collection
@@ -208,7 +208,7 @@ function TokenDetail({
             View on Art Blocks
           </a>
           <Link
-            href={`/gallery/${encodeURIComponent(address)}`}
+            href={`/${encodeURIComponent(address)}`}
             className="text-xs uppercase tracking-widest text-muted hover:text-foreground"
           >
             Back to Collection

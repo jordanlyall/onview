@@ -32,19 +32,19 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
             <Link
-              href="/gallery/snowfro.eth"
+              href="/snowfro.eth"
               className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent sm:px-4 sm:text-sm"
             >
               snowfro.eth
             </Link>
             <Link
-              href="/gallery/vault.jordanlyall.eth"
+              href="/vault.jordanlyall.eth"
               className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent sm:px-4 sm:text-sm"
             >
               vault.jordanlyall.eth
             </Link>
             <Link
-              href="/gallery/0xhouston.eth"
+              href="/0xhouston.eth"
               className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent sm:px-4 sm:text-sm"
             >
               0xhouston.eth

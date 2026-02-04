@@ -13,7 +13,7 @@ export function WalletInput() {
     const trimmed = input.trim();
     if (trimmed) {
       // Use + separator for clean URLs (no encoding needed)
-      router.push(`/gallery/${toUrlPath(trimmed)}`);
+      router.push(`/${toUrlPath(trimmed)}`);
     }
   };
 
