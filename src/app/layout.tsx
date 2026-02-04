@@ -21,20 +21,22 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "onview.art | Art Blocks Collection Viewer",
+  title: "onview.art - A Beautiful Art Blocks Collection Viewer",
   description:
-    "Your Art Blocks collection, beautifully presented. Enter any wallet or ENS to view a curated gallery.",
+    "View any Art Blocks collection beautifully presented. Enter a wallet address or ENS name to explore Fidenzas, Ringers, Chromie Squiggles and more in a museum-style gallery experience.",
   metadataBase: new URL("https://onview.art"),
   openGraph: {
-    title: "onview.art",
-    description: "Your Art Blocks collection, beautifully presented",
+    title: "onview.art - A Beautiful Art Blocks Collection Viewer",
+    description:
+      "View any Art Blocks collection beautifully presented. Enter a wallet address or ENS name to explore generative art in a museum-style gallery experience.",
     siteName: "onview.art",
     url: "https://onview.art",
   },
   twitter: {
     card: "summary_large_image",
-    title: "onview.art",
-    description: "Your Art Blocks collection, beautifully presented",
+    title: "onview.art - A Beautiful Art Blocks Collection Viewer",
+    description:
+      "View any Art Blocks collection beautifully presented. Enter a wallet address or ENS name to explore generative art in a museum-style gallery experience.",
   },
   alternates: {
     canonical: "https://onview.art",
