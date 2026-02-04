@@ -128,7 +128,7 @@ export default async function Image({
               ))}
             </div>
 
-            {/* Branding */}
+            {/* Branding - show full URL */}
             <div
               style={{
                 display: "flex",
@@ -136,21 +136,21 @@ export default async function Image({
                 alignItems: "flex-start",
               }}
             >
+              <div style={{ display: "flex", alignItems: "baseline" }}>
+                <span style={{ fontSize: 36, color: "#ffffff" }}>onview</span>
+                <span style={{ fontSize: 36, color: "#6366f1" }}>.art</span>
+                <span style={{ fontSize: 36, color: "rgba(255,255,255,0.5)" }}>/</span>
+              </div>
               <p
                 style={{
-                  fontSize: 42,
-                  color: "#ffffff",
-                  marginBottom: 16,
+                  fontSize: 32,
+                  color: "rgba(255,255,255,0.8)",
+                  marginTop: 8,
                   maxWidth: 400,
-                  overflow: "hidden",
                 }}
               >
                 {displayName}
               </p>
-              <div style={{ display: "flex", alignItems: "baseline" }}>
-                <span style={{ fontSize: 36, color: "#ffffff" }}>onview</span>
-                <span style={{ fontSize: 36, color: "#6366f1" }}>.art</span>
-              </div>
             </div>
           </div>
         ) : (
@@ -161,13 +161,14 @@ export default async function Image({
               alignItems: "center",
             }}
           >
-            <p style={{ fontSize: 48, color: "#ffffff", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "baseline" }}>
+              <span style={{ fontSize: 48, color: "#ffffff" }}>onview</span>
+              <span style={{ fontSize: 48, color: "#6366f1" }}>.art</span>
+              <span style={{ fontSize: 48, color: "rgba(255,255,255,0.5)" }}>/</span>
+            </div>
+            <p style={{ fontSize: 36, color: "rgba(255,255,255,0.8)", marginTop: 8 }}>
               {displayName}
             </p>
-            <div style={{ display: "flex", alignItems: "baseline" }}>
-              <span style={{ fontSize: 32, color: "#ffffff" }}>onview</span>
-              <span style={{ fontSize: 32, color: "#6366f1" }}>.art</span>
-            </div>
           </div>
         )}
       </div>
