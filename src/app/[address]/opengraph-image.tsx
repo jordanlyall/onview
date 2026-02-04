@@ -58,8 +58,14 @@ async function fetchPreviewTokens(address: string): Promise<string[]> {
     const tokens = data.data?.tokens_metadata || [];
 
     // Sort by floor price (highest first), then take top 4
+    // Filter out video files (.mp4, .webm) as ImageResponse can't render them
     const sorted = tokens
-      .filter((t: { preview_asset_url: string }) => t.preview_asset_url)
+      .filter((t: { preview_asset_url: string }) => {
+        const url = t.preview_asset_url;
+        if (!url) return false;
+        const lower = url.toLowerCase();
+        return !lower.endsWith('.mp4') && !lower.endsWith('.webm');
+      })
       .sort((a: { project: { lowest_listing: number | null } }, b: { project: { lowest_listing: number | null } }) => {
         const floorA = a.project?.lowest_listing ?? 0;
         const floorB = b.project?.lowest_listing ?? 0;
