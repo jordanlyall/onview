@@ -26,14 +26,17 @@ async function resolveENS(ensName: string): Promise<string | null> {
 }
 
 async function fetchPreviewTokens(address: string): Promise<string[]> {
+  // Fetch more tokens so we can sort by floor price and pick the top 4
   const query = `
     query WalletPreview($owner: String!) {
       tokens_metadata(
         where: { owner_address: { _eq: $owner } }
-        order_by: { project_name: asc }
-        limit: 4
+        limit: 100
       ) {
         preview_asset_url
+        project {
+          lowest_listing
+        }
       }
     }
   `;
@@ -53,9 +56,17 @@ async function fetchPreviewTokens(address: string): Promise<string[]> {
 
     const data = await response.json();
     const tokens = data.data?.tokens_metadata || [];
-    return tokens
-      .map((t: { preview_asset_url: string }) => t.preview_asset_url)
-      .filter(Boolean);
+
+    // Sort by floor price (highest first), then take top 4
+    const sorted = tokens
+      .filter((t: { preview_asset_url: string }) => t.preview_asset_url)
+      .sort((a: { project: { lowest_listing: number | null } }, b: { project: { lowest_listing: number | null } }) => {
+        const floorA = a.project?.lowest_listing ?? 0;
+        const floorB = b.project?.lowest_listing ?? 0;
+        return floorB - floorA;
+      });
+
+    return sorted.slice(0, 4).map((t: { preview_asset_url: string }) => t.preview_asset_url);
   } catch {
     return [];
   }
