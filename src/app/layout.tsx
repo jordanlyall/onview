@@ -24,15 +24,20 @@ export const metadata: Metadata = {
   title: "onview.art | Art Blocks Collection Viewer",
   description:
     "Your Art Blocks collection, beautifully presented. Enter any wallet or ENS to view a curated gallery.",
+  metadataBase: new URL("https://onview.art"),
   openGraph: {
     title: "onview.art",
     description: "Your Art Blocks collection, beautifully presented",
     siteName: "onview.art",
+    url: "https://onview.art",
   },
   twitter: {
     card: "summary_large_image",
     title: "onview.art",
     description: "Your Art Blocks collection, beautifully presented",
+  },
+  alternates: {
+    canonical: "https://onview.art",
   },
 };
 
