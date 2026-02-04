@@ -21,22 +21,22 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "onview.art - A Beautiful Art Blocks Collection Viewer",
+  title: "onview.art - Turn Any Wallet Into a Gallery",
   description:
-    "View any Art Blocks collection beautifully presented. Enter a wallet address or ENS name to explore Fidenzas, Ringers, Chromie Squiggles and more in a museum-style gallery experience.",
+    "Instant Art Blocks galleries. Paste any wallet or ENS to create a beautiful, shareable gallery of your collection. No signup required.",
   metadataBase: new URL("https://onview.art"),
   openGraph: {
-    title: "onview.art - A Beautiful Art Blocks Collection Viewer",
+    title: "onview.art - Turn Any Wallet Into a Gallery",
     description:
-      "View any Art Blocks collection beautifully presented. Enter a wallet address or ENS name to explore generative art in a museum-style gallery experience.",
+      "Instant Art Blocks galleries. Paste any wallet or ENS to create a beautiful, shareable gallery of your collection. No signup required.",
     siteName: "onview.art",
     url: "https://onview.art",
   },
   twitter: {
     card: "summary_large_image",
-    title: "onview.art - A Beautiful Art Blocks Collection Viewer",
+    title: "onview.art - Turn Any Wallet Into a Gallery",
     description:
-      "View any Art Blocks collection beautifully presented. Enter a wallet address or ENS name to explore generative art in a museum-style gallery experience.",
+      "Instant Art Blocks galleries. Paste any wallet or ENS to create a beautiful, shareable gallery of your collection. No signup required.",
   },
   alternates: {
     canonical: "https://onview.art",

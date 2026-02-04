@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "onview.art - Art Blocks Collection Viewer";
+export const alt = "onview.art - Turn Any Wallet Into a Gallery";
 export const size = {
   width: 1200,
   height: 630,
@@ -100,7 +100,7 @@ export default async function Image() {
               lineHeight: 1.4,
             }}
           >
-            Your Art Blocks collection, beautifully presented
+            Turn any wallet into a gallery
           </p>
         </div>
       </div>
