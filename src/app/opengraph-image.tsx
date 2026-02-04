@@ -100,7 +100,7 @@ export default async function Image() {
               lineHeight: 1.4,
             }}
           >
-            Turn any wallet into a gallery
+            Instant galleries for Art Blocks collectors
           </p>
         </div>
       </div>
