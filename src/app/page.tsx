@@ -55,14 +55,14 @@ export default function Home() {
 
       <footer className="absolute bottom-4 left-0 right-0 text-center">
         <p className="text-xs text-muted/50">
-          Powered by{" "}
+          A side project by{" "}
           <a
-            href="https://artblocks.io"
+            href="https://x.com/jordanlyall"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-accent"
           >
-            Art Blocks
+            @jordanlyall
           </a>
         </p>
       </footer>
