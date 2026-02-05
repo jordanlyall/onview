@@ -6,7 +6,9 @@ import { resolveInput } from "@/lib/ens";
 import {
   fetchWalletTokens,
   fetchMultiWalletTokens,
+  fetchUserProfile,
   ArtBlocksToken,
+  ArtBlocksUserProfile,
 } from "@/lib/artblocks";
 import { groupTokens, TokenGroup } from "@/lib/grouping";
 import { CollectorHeader } from "@/components/CollectorHeader";
@@ -16,6 +18,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { TokenModal } from "@/components/TokenModal";
 import Link from "next/link";
 
+type ViewMode = "wallet" | "profile";
+
 type Status =
   | { phase: "resolving" }
   | { phase: "fetching"; message: string }
@@ -24,8 +28,12 @@ type Status =
       phase: "done";
       address: string;
       ens: string | null;
-      groups: TokenGroup[];
-      walletCount: number;
+      // Data for both views
+      walletGroups: TokenGroup[];
+      profileGroups: TokenGroup[];
+      linkedWallets: string[];
+      profile: ArtBlocksUserProfile | null;
+      displayName: string | null;
     }
   | { phase: "error"; message: string }
   | { phase: "empty"; address: string; ens: string | null };
@@ -35,6 +43,24 @@ export default function GalleryPage() {
   const input = decodeURIComponent(params.address as string);
   const [status, setStatus] = useState<Status>({ phase: "resolving" });
   const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("profile"); // Default to full profile
+
+  // Computed values based on view mode
+  const activeGroups = useMemo(() => {
+    if (status.phase !== "done") return [];
+    return viewMode === "profile" ? status.profileGroups : status.walletGroups;
+  }, [status, viewMode]);
+
+  const activeWalletCount = useMemo(() => {
+    if (status.phase !== "done") return 1;
+    return viewMode === "profile" ? status.linkedWallets.length : 1;
+  }, [status, viewMode]);
+
+  // Check if toggle should be shown (only when there are multiple linked wallets)
+  const showViewToggle = useMemo(() => {
+    if (status.phase !== "done") return false;
+    return status.linkedWallets.length > 1;
+  }, [status]);
 
   const handleSelectToken = useCallback((tokenId: string) => {
     setSelectedTokenId(tokenId);
@@ -50,17 +76,16 @@ export default function GalleryPage() {
 
   // Build ordered list of all token IDs matching gallery display order
   const allTokenIds = useMemo(() => {
-    if (status.phase !== "done") return [];
-    return status.groups.flatMap((g) =>
+    return activeGroups.flatMap((g) =>
       g.projects.flatMap((p) => p.tokens.map((t) => t.id))
     );
-  }, [status]);
+  }, [activeGroups]);
 
-  // Update page title when collection loads
+  // Update page title when collection loads or view mode changes
   useEffect(() => {
     if (status.phase === "done") {
-      const name = status.ens || `${status.address.slice(0, 6)}...${status.address.slice(-4)}`;
-      const totalPieces = status.groups.reduce(
+      const name = status.profile?.name || status.displayName || status.ens || `${status.address.slice(0, 6)}...${status.address.slice(-4)}`;
+      const totalPieces = activeGroups.reduce(
         (sum, g) => sum + g.projects.reduce((s, p) => s + p.tokens.length, 0),
         0
       );
@@ -68,7 +93,7 @@ export default function GalleryPage() {
     } else if (status.phase === "error" || status.phase === "empty") {
       document.title = "onview.art";
     }
-  }, [status]);
+  }, [status, activeGroups]);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,25 +105,36 @@ export default function GalleryPage() {
 
         if (cancelled) return;
 
-        let tokens: ArtBlocksToken[];
+        // Fetch user profile and linked wallets from Art Blocks API
+        const profileResult = await fetchUserProfile(primary.address);
 
-        if (wallets.length === 1) {
-          setStatus({ phase: "fetching", message: "Fetching collection..." });
-          tokens = await fetchWalletTokens(primary.address, (count) => {
-            if (!cancelled) {
-              setStatus({
-                phase: "fetching",
-                message: `Fetched ${count} pieces...`,
-              });
-            }
-          });
-        } else {
+        if (cancelled) return;
+
+        const linkedWallets = profileResult.linkedWallets;
+        const hasMultipleWallets = linkedWallets.length > 1;
+
+        // Always fetch the single wallet first
+        setStatus({ phase: "fetching", message: "Fetching collection..." });
+        const walletTokens = await fetchWalletTokens(primary.address, (count) => {
+          if (!cancelled) {
+            setStatus({
+              phase: "fetching",
+              message: `Fetched ${count} pieces...`,
+            });
+          }
+        });
+
+        if (cancelled) return;
+
+        // If there are linked wallets, fetch the full profile too
+        let profileTokens: ArtBlocksToken[] = walletTokens;
+        if (hasMultipleWallets) {
           setStatus({
             phase: "fetching",
-            message: `Fetching from ${wallets.length} wallets...`,
+            message: `Fetching from ${linkedWallets.length} linked wallets...`,
           });
-          tokens = await fetchMultiWalletTokens(
-            wallets.map((w) => w.address),
+          profileTokens = await fetchMultiWalletTokens(
+            linkedWallets,
             (count, wallet, total) => {
               if (!cancelled) {
                 setStatus({
@@ -111,7 +147,9 @@ export default function GalleryPage() {
         }
 
         if (cancelled) return;
-        if (tokens.length === 0) {
+
+        // Check if we have any tokens at all
+        if (profileTokens.length === 0 && walletTokens.length === 0) {
           setStatus({
             phase: "empty",
             address: primary.address,
@@ -120,16 +158,20 @@ export default function GalleryPage() {
           return;
         }
 
-        setStatus({ phase: "grouping", count: tokens.length });
-        const groups = groupTokens(tokens);
+        setStatus({ phase: "grouping", count: profileTokens.length });
+        const walletGroups = groupTokens(walletTokens);
+        const profileGroups = hasMultipleWallets ? groupTokens(profileTokens) : walletGroups;
 
         if (cancelled) return;
         setStatus({
           phase: "done",
           address: primary.address,
           ens: primary.ens,
-          groups,
-          walletCount: wallets.length,
+          walletGroups,
+          profileGroups,
+          linkedWallets,
+          profile: profileResult.profile,
+          displayName: profileResult.displayName,
         });
       } catch (err) {
         if (cancelled) return;
@@ -197,14 +239,20 @@ export default function GalleryPage() {
 
       {status.phase === "done" && (
         <>
-          <CollectionNav groups={status.groups} />
+          <CollectionNav groups={activeGroups} />
           <CollectorHeader
             address={status.address}
             ens={status.ens}
-            groups={status.groups}
-            walletCount={status.walletCount}
+            groups={activeGroups}
+            walletCount={activeWalletCount}
+            profile={status.profile}
+            displayName={status.displayName}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showViewToggle={showViewToggle}
+            linkedWalletCount={status.linkedWallets.length}
           />
-          {status.groups.map((group, i) => (
+          {activeGroups.map((group, i) => (
             <GallerySection
               key={group.label}
               group={group}

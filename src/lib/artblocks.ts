@@ -1,6 +1,110 @@
 const HASURA_ENDPOINT = "https://data.artblocks.io/v1/graphql";
 
-const PAGE_SIZE = 100;
+// Increased page size - Hasura can handle larger batches
+const PAGE_SIZE = 500;
+
+// Query to get user profile and all linked wallets for an address
+const USER_PROFILE_QUERY = `
+  query UserProfile($address: String!) {
+    users(where: { public_address: { _eq: $address } }) {
+      public_address
+      display_name
+      profile_id
+      profile_by_id {
+        id
+        username
+        name
+        bio
+        twitter_username
+        instagram_username
+        external_website
+      }
+    }
+  }
+`;
+
+// Query to get all linked wallets for a profile
+const LINKED_WALLETS_QUERY = `
+  query LinkedWallets($profileId: Int!) {
+    users(where: { profile_id: { _eq: $profileId } }) {
+      public_address
+      display_name
+    }
+  }
+`;
+
+export interface ArtBlocksUserProfile {
+  id: number;
+  username: string | null;
+  name: string | null;
+  bio: string | null;
+  twitter_username: string | null;
+  instagram_username: string | null;
+  external_website: string | null;
+}
+
+export interface ArtBlocksUser {
+  public_address: string;
+  display_name: string | null;
+  profile_id: number | null;
+  profile_by_id: ArtBlocksUserProfile | null;
+}
+
+export interface LinkedWalletsResult {
+  profile: ArtBlocksUserProfile | null;
+  linkedWallets: string[];
+  displayName: string | null;
+}
+
+export async function fetchUserProfile(address: string): Promise<LinkedWalletsResult> {
+  const response = await fetch(HASURA_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: USER_PROFILE_QUERY,
+      variables: { address: address.toLowerCase() },
+    }),
+  });
+
+  if (!response.ok) {
+    return { profile: null, linkedWallets: [address], displayName: null };
+  }
+
+  const data = await response.json();
+  const user = data.data?.users?.[0] as ArtBlocksUser | undefined;
+
+  if (!user || !user.profile_id) {
+    return { profile: null, linkedWallets: [address], displayName: user?.display_name || null };
+  }
+
+  // Fetch all linked wallets for this profile
+  const linkedResponse = await fetch(HASURA_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: LINKED_WALLETS_QUERY,
+      variables: { profileId: user.profile_id },
+    }),
+  });
+
+  if (!linkedResponse.ok) {
+    return {
+      profile: user.profile_by_id,
+      linkedWallets: [address],
+      displayName: user.profile_by_id?.name || user.display_name || null
+    };
+  }
+
+  const linkedData = await linkedResponse.json();
+  const linkedUsers = linkedData.data?.users as { public_address: string }[] || [];
+  const linkedWallets = linkedUsers.map(u => u.public_address);
+
+  return {
+    profile: user.profile_by_id,
+    linkedWallets: linkedWallets.length > 0 ? linkedWallets : [address],
+    displayName: user.profile_by_id?.name || user.display_name || null
+  };
+}
 
 const TOKENS_QUERY = `
   query WalletTokens($owner: String!, $limit: Int!, $offset: Int!) {
@@ -129,32 +233,46 @@ export async function fetchTokenDetail(
 
 async function fetchPage(
   ownerAddress: string,
-  offset: number
+  offset: number,
+  retries = 3
 ): Promise<ArtBlocksToken[]> {
-  const response = await fetch(HASURA_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: TOKENS_QUERY,
-      variables: {
-        owner: ownerAddress.toLowerCase(),
-        limit: PAGE_SIZE,
-        offset,
-      },
-    }),
-  });
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch(HASURA_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: TOKENS_QUERY,
+          variables: {
+            owner: ownerAddress.toLowerCase(),
+            limit: PAGE_SIZE,
+            offset,
+          },
+        }),
+      });
 
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+      if (!response.ok) {
+        if (response.status === 429 && attempt < retries - 1) {
+          // Rate limited - wait and retry
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          continue;
+        }
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.errors) {
+        throw new Error(data.errors[0]?.message || "GraphQL error");
+      }
+
+      return data.data.tokens_metadata;
+    } catch (err) {
+      if (attempt === retries - 1) throw err;
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+    }
   }
-
-  const data = await response.json();
-
-  if (data.errors) {
-    throw new Error(data.errors[0]?.message || "GraphQL error");
-  }
-
-  return data.data.tokens_metadata;
+  return [];
 }
 
 export async function fetchWalletTokens(
@@ -180,13 +298,27 @@ export async function fetchMultiWalletTokens(
   addresses: string[],
   onProgress?: (count: number, wallet: number, totalWallets: number) => void
 ): Promise<ArtBlocksToken[]> {
+  // Fetch wallets in parallel (max 3 concurrent to avoid rate limits)
+  const CONCURRENT_LIMIT = 3;
   const allTokens: ArtBlocksToken[] = [];
+  let completedWallets = 0;
 
-  for (let i = 0; i < addresses.length; i++) {
-    const walletTokens = await fetchWalletTokens(addresses[i], (count) => {
-      onProgress?.(allTokens.length + count, i + 1, addresses.length);
-    });
-    allTokens.push(...walletTokens);
+  for (let i = 0; i < addresses.length; i += CONCURRENT_LIMIT) {
+    const batch = addresses.slice(i, i + CONCURRENT_LIMIT);
+    const batchResults = await Promise.all(
+      batch.map(async (addr, batchIndex) => {
+        const tokens = await fetchWalletTokens(addr, (count) => {
+          onProgress?.(allTokens.length + count, completedWallets + batchIndex + 1, addresses.length);
+        });
+        return tokens;
+      })
+    );
+
+    for (const tokens of batchResults) {
+      allTokens.push(...tokens);
+      completedWallets++;
+    }
+    onProgress?.(allTokens.length, completedWallets, addresses.length);
   }
 
   // Deduplicate by token id (in case a token moved between wallets)

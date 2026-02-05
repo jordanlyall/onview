@@ -52,10 +52,18 @@ function getTierOrder(label: string): number {
 }
 
 export function groupTokens(tokens: ArtBlocksToken[]): TokenGroup[] {
+  // Deduplicate tokens by ID first
+  const seen = new Set<string>();
+  const uniqueTokens = tokens.filter((t) => {
+    if (seen.has(t.id)) return false;
+    seen.add(t.id);
+    return true;
+  });
+
   // Group by tier
   const tierMap = new Map<string, ArtBlocksToken[]>();
 
-  for (const token of tokens) {
+  for (const token of uniqueTokens) {
     const tier = getTierLabel(token);
     if (!tierMap.has(tier)) {
       tierMap.set(tier, []);
