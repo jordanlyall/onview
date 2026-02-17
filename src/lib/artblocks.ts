@@ -1,7 +1,6 @@
 const HASURA_ENDPOINT = "https://data.artblocks.io/v1/graphql";
 
-// Increased page size - Hasura can handle larger batches
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 100;
 
 // Query to get user profile and all linked wallets for an address
 const USER_PROFILE_QUERY = `
