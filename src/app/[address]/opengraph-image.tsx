@@ -1,4 +1,7 @@
 import { ImageResponse } from "next/og";
+import { createPublicClient, http } from "viem";
+import { normalize } from "viem/ens";
+import { mainnet } from "viem/chains";
 
 export const runtime = "edge";
 
@@ -11,15 +14,17 @@ export const contentType = "image/png";
 
 const HASURA_ENDPOINT = "https://data.artblocks.io/v1/graphql";
 
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
+
 async function resolveENS(ensName: string): Promise<string | null> {
   try {
-    const response = await fetch(
-      `https://api.ensideas.com/ens/resolve/${ensName}`,
-      { cache: "no-store" }
-    );
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data.address || null;
+    const address = await client.getEnsAddress({
+      name: normalize(ensName),
+    });
+    return address?.toLowerCase() ?? null;
   } catch {
     return null;
   }
