@@ -11,6 +11,7 @@ export const size = {
   height: 630,
 };
 export const contentType = "image/png";
+export const revalidate = 3600; // cache OG images for 1 hour
 
 const HASURA_ENDPOINT = "https://data.artblocks.io/v1/graphql";
 
@@ -54,7 +55,7 @@ async function fetchPreviewTokens(address: string): Promise<string[]> {
         query,
         variables: { owner: address.toLowerCase() },
       }),
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) return [];
